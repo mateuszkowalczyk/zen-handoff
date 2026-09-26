@@ -174,6 +174,8 @@ Either:
 
 ## Durable decisions
 
+Use `.agents/templates/PDR-template.md` and `.agents/templates/ADR-template.md` to create accepted decision records in `docs/decisions/`. Replace the placeholders with the actual decision, date, and consequences; keep the reusable templates in `.agents/templates/`.
+
 Use:
 
 ```text

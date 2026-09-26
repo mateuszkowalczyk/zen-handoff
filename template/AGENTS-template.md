@@ -147,6 +147,8 @@ docs/architecture.md
 docs/decisions/
 ```
 
+Coordinator creates decision records in `docs/decisions/` from the PDR and ADR templates in `.agents/templates/`. Keep the templates out of `docs/decisions/`.
+
 Naming convention:
 
 ```text

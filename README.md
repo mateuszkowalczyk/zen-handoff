@@ -85,13 +85,14 @@ AGENTS.md
     builder-simple.md
     builder-complex.md
     reviewer.md
+  templates/
+    PDR-template.md
+    ADR-template.md
 
 docs/
   product.md
   architecture.md
   decisions/
-    PDR-template.md
-    ADR-template.md
 ```
 
 Preserve any existing project-specific instructions in `AGENTS.md`. Zen Handoff's shared instructions should complement them rather than replace them.
@@ -184,6 +185,8 @@ Important decisions are recorded under:
 docs/decisions/
 ```
 
+Coordinator creates PDRs and ADRs there using the reusable templates in `.agents/templates/`.
+
 Naming convention:
 
 ```text
@@ -198,6 +201,6 @@ For example:
 20260926-ADR-identity-storage.md
 ```
 
-Use a **PDR** when the decision mainly affects what the product does or how the user experiences it.
+Coordinator records accepted decisions as **PDRs** when they mainly affect what the product does or how the user experiences it.
 
-Use an **ADR** when the decision mainly affects how the system is built.
+Coordinator records accepted decisions as **ADRs** when they mainly affect how the system is built.
