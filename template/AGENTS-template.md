@@ -47,6 +47,8 @@ Do not rely on private agent-to-agent messages as workflow state.
 
 Only one `role:*` label and one `status:*` label should normally be present on an active task.
 
+Coordinator records task dependencies with GitHub Issues' **blocked by** relationship. If a dependency prevents work from starting, keep the task `role:coordinator` and `status:blocked` until Coordinator routes it onward.
+
 ## Required labels
 
 ```text

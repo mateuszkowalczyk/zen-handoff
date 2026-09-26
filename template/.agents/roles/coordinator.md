@@ -76,6 +76,8 @@ After the reply:
 
 ## Task format
 
+Link task dependencies using GitHub Issues' **blocked by** relationship as well as listing their issue numbers below. If a task cannot start until its dependencies are complete, keep it `role:coordinator` and `status:blocked`; when they are complete, route it to its Builder with `status:ready`.
+
 Use:
 
 ```markdown
