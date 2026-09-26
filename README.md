@@ -137,17 +137,17 @@ Start your autonomous work loop.
 
 Repeat with the corresponding role file for the other three clones.
 
-Zen Handoff is intentionally tool-agnostic. The runtime can be Codex CLI, Claude Code, Pi, OMP, or another harness that provides shell, Git, GitHub CLI, and isolated subagent support.
+Zen Handoff is intentionally tool-agnostic. The runtime can be Codex CLI, Claude Code, OpenCode, or another harness that provides shell, Git, GitHub CLI, and isolated subagent support.
 
 ## Human interaction
 
-Talk directly to the **Coordinator**.
+Contact the **Coordinator** in its terminal, or through GitHub: create an issue or comment on an existing one labeled `role:coordinator`. The label routes the issue to the Coordinator's queue.
 
 If another role needs a protected or ambiguous decision, it routes the relevant GitHub Issue to Coordinator.
 
 Coordinator either resolves the decision within its authority or comments `HUMAN_DECISION_REQUIRED` in that issue and mentions the human.
 
-Any important decision made through the Coordinator terminal must be persisted into the relevant issue, product/architecture documentation, PDR, or ADR before dependent work continues.
+The Coordinator must persist any important decision made through its terminal in the relevant issue, product/architecture documentation, PDR, or ADR before dependent work continues.
 
 ## Handoffs
 
@@ -168,7 +168,7 @@ Reviewer
     └── DECISION_REQUIRED → Coordinator
 ```
 
-There is no hidden agent-to-agent communication state.
+Because agents communicate through GitHub Issues, their handoffs remain visible in issue comments and labels rather than hidden agent-to-agent state.
 
 ## Durable decisions
 
