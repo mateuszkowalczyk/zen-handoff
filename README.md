@@ -119,23 +119,30 @@ priority:high
 
 ## Starting the agents
 
-Start your preferred CLI coding agent in each clone.
+Start your preferred CLI coding agent from each clone.
 
-For example:
-
-```text
-cd ~/agents/my-project/coordinator
-codex
-```
-
-Then tell it:
+If your harness loads `AGENTS.md` automatically, you do not need to ask the agent to read it again. Otherwise, ask it to read `AGENTS.md` first. Then tell it:
 
 ```text
-Read AGENTS.md and .agents/roles/coordinator.md.
+Read .agents/roles/coordinator.md.
 Start your autonomous work loop.
 ```
 
 Repeat with the corresponding role file for the other three clones.
+
+You can also pass the startup message at launch instead of typing it. For example, from the Coordinator clone:
+
+```bash
+codex "Read .agents/roles/coordinator.md. Start your autonomous work loop."
+```
+
+```bash
+claude "Read .agents/roles/coordinator.md. Start your autonomous work loop."
+```
+
+```bash
+opencode --prompt "Read .agents/roles/coordinator.md. Start your autonomous work loop."
+```
 
 Zen Handoff is intentionally tool-agnostic. The runtime can be Codex CLI, Claude Code, OpenCode, or another harness that provides shell, Git, GitHub CLI, and isolated subagent support.
 
