@@ -135,7 +135,7 @@ If another role needs a protected or ambiguous decision, it routes the relevant 
 
 Coordinator either resolves the decision within its authority or comments `HUMAN_DECISION_REQUIRED` in that issue and mentions the human.
 
-The Coordinator must persist any important decision made through its terminal in the relevant issue, product/architecture documentation, PDR, or ADR before dependent work continues.
+Before related work continues, Coordinator records important outcomes from terminal conversations in the relevant issue or decision record. Lasting decisions also go in the relevant product or architecture docs and a PDR or ADR—not just issue comments.
 
 ## Handoffs
 
@@ -155,6 +155,8 @@ Reviewer
     ├── CHANGES_REQUIRED → original Builder
     └── DECISION_REQUIRED → Coordinator
 ```
+
+After `PASS`, Coordinator verifies completion, follows the project's merge/close procedure, comments `DONE`, sets `status:done`, and closes the issue when appropriate.
 
 Because agents communicate through GitHub Issues, their handoffs remain visible in issue comments and labels rather than hidden agent-to-agent state.
 
