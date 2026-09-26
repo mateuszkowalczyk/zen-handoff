@@ -27,37 +27,6 @@ Agents communicate through **GitHub Issues, comments, labels, and linked branche
 
 There is no message bus, orchestration server, custom database, or polling daemon.
 
-## Runtime model
-
-Use four separate clones of the same project repository:
-
-```text
-~/Work/my-project/
-├── coordinator/
-├── builder-simple/
-├── builder-complex/
-└── reviewer/
-```
-
-Run one persistent CLI agent in each clone.
-
-```text
-Coordinator       persistent interactive context
-
-Builder Simple    persistent role supervisor
-                  └── fresh subagent per task
-
-Builder Complex   persistent role supervisor
-                  └── fresh subagent per task
-
-Reviewer          persistent role supervisor
-                  └── fresh subagent per review pass
-```
-
-The Builder and Reviewer parent agents only poll, select work, and delegate it to fresh isolated subagents.
-
-Task-local conversational context is discarded after every handoff. Durable context lives in GitHub and the repository.
-
 ## Installing Zen Handoff in a project
 
 Copy the contents of `template/` into your project repository.
@@ -117,34 +86,46 @@ human-needed
 priority:high
 ```
 
-## Starting the agents
+## Quick start
 
-Start your preferred CLI coding agent from each clone.
-
-If your harness loads `AGENTS.md` automatically, you do not need to ask the agent to read it again. Otherwise, ask it to read `AGENTS.md` first. Then tell it:
+Create four separate clones of the project repository:
 
 ```text
-Read .agents/roles/coordinator.md.
+~/Work/my-project/
+├── coordinator/
+├── builder-simple/
+├── builder-complex/
+└── reviewer/
+```
+
+Run one persistent CLI agent from each clone.
+
+Tell each agent:
+
+```text
+Read .agents/roles/<role-name>.md.
 Start your autonomous work loop.
 ```
 
-Repeat with the corresponding role file for the other three clones.
+Replace `<role-name>` with the name of its clone: `coordinator`, `builder-simple`, `builder-complex`, or `reviewer`.
 
-You can also pass the startup message at launch instead of typing it. For example, from the Coordinator clone:
+You can also pass the startup message at launch instead of typing it. From the corresponding clone, run one of:
 
 ```bash
-codex "Read .agents/roles/coordinator.md. Start your autonomous work loop."
+codex "Read .agents/roles/<role-name>.md. Start your autonomous work loop."
 ```
 
 ```bash
-claude "Read .agents/roles/coordinator.md. Start your autonomous work loop."
+claude "Read .agents/roles/<role-name>.md. Start your autonomous work loop."
 ```
 
 ```bash
-opencode --prompt "Read .agents/roles/coordinator.md. Start your autonomous work loop."
+opencode --prompt "Read .agents/roles/<role-name>.md. Start your autonomous work loop."
 ```
 
-Zen Handoff is intentionally tool-agnostic. The runtime can be Codex CLI, Claude Code, OpenCode, or another harness that provides shell, Git, GitHub CLI, and isolated subagent support.
+If your harness supports it, choose a model and reasoning effort for each role. For example, Builder Simple can use a smaller, cheaper model with lower reasoning effort than Builder Complex.
+
+Give work to the Coordinator through its terminal or a GitHub Issue labeled `role:coordinator`; follow progress in the issue.
 
 ## Human interaction
 
