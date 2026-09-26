@@ -1,20 +1,22 @@
 # Zen Handoff
 
-A minimal autonomous multi-agent workflow for software development.
+An autonomous agent workflow for software development. Its goal is to keep the human in the loop while reducing cognitive load. Team communication and handoffs are centered on GitHub Issues.
 
 ## Philosophy
 
 Zen Handoff is built around a simple idea: **autonomous agents should reduce cognitive load, not create more of it**.
 
-Instead of a noisy swarm or heavyweight orchestration layer, work moves calmly through a few clear roles. GitHub Issues hold the durable state, each handoff is explicit, and task-local agent context is discarded when the work is done.
+Work with agents much as you would with human coworkers: discuss what needs doing with a primary point of contact, track the work in GitHub Issues, and use issue comments for questions, decisions, and handoffs. The **Coordinator** is that primary contact. You mostly talk to it; it turns requests into scoped issues, assigns work to Builders, handles blockers and review outcomes, and brings decisions back to you when needed.
 
 The intended rhythm is:
 
-> clear task → focused agent → explicit handoff → fresh context
+> human request → Coordinator scopes an issue → Builder implements → Reviewer checks → Coordinator closes the loop
 
-Humans stay in control through the Coordinator, while Builders and Reviewer work independently without carrying unnecessary conversational baggage from one task to the next.
+GitHub Issues and the repository hold the shared record, including important outcomes from conversations with Coordinator. Each role-to-role handoff is explicit, so the human can follow the work without managing every agent directly. Fresh task contexts help Builders and Reviewer focus on their current assignment; the handoff model, not conversational memory, keeps the team coordinated.
 
 ## Roles
+
+Four roles divide the work, with clear responsibilities and explicit handoffs between them.
 
 - **Coordinator** — human-facing agent; owns task scope, acceptance, routing, priorities, and durable decisions.
 - **Builder Simple** — handles localized, well-understood, low-risk implementation work.
@@ -30,7 +32,7 @@ There is no message bus, orchestration server, custom database, or polling daemo
 Use four separate clones of the same project repository:
 
 ```text
-~/agents/my-project/
+~/Work/my-project/
 ├── coordinator/
 ├── builder-simple/
 ├── builder-complex/
