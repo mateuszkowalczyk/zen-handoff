@@ -127,6 +127,10 @@ If your harness supports it, choose a model and reasoning effort for each role. 
 
 Give work to the Coordinator through its terminal or a GitHub Issue labeled `role:coordinator`; follow progress in the issue.
 
+### Optional OpenCode V2 setup
+
+See the [OpenCode setup guide](integrations/opencode/setup.md) for configuring four independent clones and per-role models. Its companion [tmux launcher](integrations/opencode/start-agents.sh) opens four tiled OpenCode sessions, each waiting for user confirmation before starting work. These integration files are separate from `template/`; copy the launcher into the clones' parent folder, not into each project clone.
+
 ## Human interaction
 
 Contact the **Coordinator** in its terminal, or through GitHub: create an issue or comment on an existing one labeled `role:coordinator`. The label routes the issue to the Coordinator's queue.
