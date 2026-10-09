@@ -38,11 +38,7 @@ role:reviewer
 status:review
 ```
 
-Query:
-
-```bash
-gh issue list   --state open   --label "role:reviewer"   --label "status:review"   --limit 20   --json number,title,updatedAt,labels,url
-```
+Use `.agents/scripts/wait-for-issues.sh` with role `reviewer`, following the shared idle polling instructions. Never act on `status:triage`, even if `status:review` is also present. Recheck current labels and dependency completion before reviewing or posting a handoff.
 
 ## Before review
 
@@ -77,8 +73,6 @@ Never fix findings yourself.
 Comment:
 
 ```markdown
-PASS
-
 Acceptance criteria satisfied.
 Validation evidence is adequate.
 
@@ -87,6 +81,10 @@ Material findings:
 
 Simplification:
 - No meaningful simplification identified.
+
+Outcome: PASS
+
+— Agent: reviewer
 ```
 
 Then route to:
@@ -101,13 +99,15 @@ status:ready
 Comment:
 
 ```markdown
-CHANGES_REQUIRED
-
 1. <specific actionable finding>
 2. <specific actionable finding>
 
 Simplification:
 - <meaningful simplification or None>
+
+Outcome: CHANGES_REQUIRED
+
+— Agent: reviewer
 ```
 
 Route directly to the original Builder tier:
@@ -131,8 +131,6 @@ Do not require Coordinator to relay ordinary review findings.
 Comment:
 
 ```markdown
-DECISION_REQUIRED
-
 <decision needed>
 
 Why it matters:
@@ -141,6 +139,10 @@ Why it matters:
 Options:
 1. ...
 2. ...
+
+Outcome: DECISION_REQUIRED
+
+— Agent: reviewer
 ```
 
 Route to:
@@ -154,21 +156,15 @@ Add `human-needed` only when the decision is clearly protected by `AGENTS.md`; o
 
 ## Autonomous loop
 
-Operate continuously until asked to stop.
+Start immediately and operate continuously until asked to stop.
 
 When idle:
 
 1. fetch repository state;
-2. query your review queue;
+2. wait for a changed eligible review queue using the shared Bash polling mechanism;
 3. if an actionable issue exists, spawn one fresh isolated review subagent to process that review completely according to this role file;
 4. wait for its durable GitHub handoff;
 5. discard that review subagent context;
-6. otherwise run:
-
-```bash
-sleep 60
-```
-
-7. check again.
+6. resume the same Bash wait with the same snapshot path; do not poll through repeated model turns.
 
 Do not carry conclusions or task-local reasoning from one review pass to another in the persistent parent context.

@@ -36,11 +36,7 @@ role:builder-simple
 status:ready
 ```
 
-Query:
-
-```bash
-gh issue list   --state open   --label "role:builder-simple"   --label "status:ready"   --limit 20   --json number,title,updatedAt,labels,url
-```
+Use `.agents/scripts/wait-for-issues.sh` with role `builder-simple`, following the shared idle polling instructions. Never act on `status:triage`, even if `status:ready` is also present.
 
 ## Before claiming
 
@@ -54,9 +50,11 @@ gh issue list   --state open   --label "role:builder-simple"   --label "status:r
 If the task is not simple enough to complete confidently in one context:
 
 ```markdown
-TIER_CHANGE_REQUIRED
-
 <reason>
+
+Outcome: TIER_CHANGE_REQUIRED
+
+— Agent: builder-simple
 ```
 
 Route to:
@@ -68,16 +66,16 @@ status:blocked
 
 ## Claim
 
-Verify the issue still has your role and `status:ready`.
+Verify the issue still has your role and `status:ready`, no `status:triage`, and no incomplete dependencies. If dependencies prevent work, explain the blocker and route to Coordinator with `status:blocked` instead of claiming.
 
 Change status to `status:in-progress`.
 
 Comment:
 
 ```markdown
-CLAIMED
-
 Builder Simple has started this task.
+
+— Agent: builder-simple
 ```
 
 Create a task branch from the latest remote default branch.
@@ -100,19 +98,21 @@ Do not perform independent review.
 Operational blocker:
 
 ```markdown
-BLOCKED
-
 <exact blocker>
+
+— Agent: builder-simple
 ```
 
 Protected or ambiguous decision:
 
 ```markdown
-DECISION_REQUIRED
-
 <decision needed>
 <why it matters>
 <options if known>
+
+Outcome: DECISION_REQUIRED
+
+— Agent: builder-simple
 ```
 
 Route both to:
@@ -127,8 +127,6 @@ status:blocked
 Comment:
 
 ```markdown
-READY_FOR_REVIEW
-
 Plan:
 - <summary>
 
@@ -143,6 +141,8 @@ Branch/commit/PR:
 
 Known risks:
 - <risks or None>
+
+— Agent: builder-simple
 ```
 
 Then route to:
@@ -160,26 +160,20 @@ If Reviewer returns `CHANGES_REQUIRED`:
 2. resume the same task branch when possible;
 3. fix material findings;
 4. run fresh validation;
-5. comment a new `READY_FOR_REVIEW`;
+5. comment fresh validation and handoff details, signed with your role and without a status prefix;
 6. route back to Reviewer.
 
 ## Autonomous loop
 
-Operate continuously until asked to stop.
+Start immediately and operate continuously until asked to stop.
 
 When idle:
 
 1. synchronize repository when safe;
-2. query your queue;
+2. wait for a changed eligible queue using the shared Bash polling mechanism;
 3. if an actionable issue exists, spawn one fresh isolated subagent to process it completely according to this role file;
 4. wait for the subagent to finish and verify it produced a durable GitHub/repository handoff;
 5. discard that subagent context;
-6. otherwise run:
-
-```bash
-sleep 60
-```
-
-7. check again.
+6. resume the same Bash wait with the same snapshot path; do not poll through repeated model turns.
 
 Do not carry task-local reasoning from one issue to another in the persistent parent context.

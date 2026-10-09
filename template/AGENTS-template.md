@@ -49,6 +49,14 @@ Only one `role:*` label and one `status:*` label should normally be present on a
 
 Coordinator records task dependencies with GitHub Issues' **blocked by** relationship. If a dependency prevents work from starting, keep the task `role:coordinator` and `status:blocked` until Coordinator routes it onward.
 
+### Human approval gate
+
+`status:triage` means the issue is not approved for agent work. All roles must ignore it, even if another actionable status label is also present. Do not claim, analyze, scope, comment on, route, implement, or review it. Only the human may remove or replace `status:triage`; a comment or terminal request does not bypass this label gate.
+
+The human approves a request by replacing `status:triage` with `status:ready` and keeping `role:coordinator`. Check the current labels before every task action or handoff. If the human sets `status:triage` during work, stop further task actions and safely preserve local work without posting to or relabeling the issue.
+
+New speculative/unapproved issues created by agents must also use `role:coordinator` and `status:triage`. Do not create approved child tasks to bypass a triaged parent. Coordinator may route tasks derived from an explicitly approved request without requiring another approval, within the existing decision authority.
+
 ## Required labels
 
 ```text
@@ -57,6 +65,7 @@ role:builder-simple
 role:builder-complex
 role:reviewer
 
+status:triage
 status:ready
 status:in-progress
 status:review
@@ -75,23 +84,46 @@ Every handoff consists of:
 2. replacing the current `role:*` label with the next role;
 3. replacing the current `status:*` label with the next status.
 
-Markers:
+Comments must start with substantive content, never a lifecycle status or standalone status marker. Labels are the only source of lifecycle status; do not prepend `CLAIMED`, `PROGRESS`, `BLOCKED`, `READY_FOR_REVIEW`, `RESOLVED`, or `DONE`.
+
+Review outcomes and decision/routing requests are distinct from lifecycle status. When needed, include one of these in an `Outcome: <marker>` field after the substantive content:
 
 ```text
-CLAIMED
-PROGRESS
-BLOCKED
 TIER_CHANGE_REQUIRED
-READY_FOR_REVIEW
 PASS
 CHANGES_REQUIRED
 DECISION_REQUIRED
 HUMAN_DECISION_REQUIRED
-RESOLVED
-DONE
 ```
 
 There is no hidden routing state.
+
+Every agent-authored GitHub comment (including PR comments and subagent comments) must end with exactly one role signature:
+
+```text
+— Agent: coordinator
+— Agent: builder-simple
+— Agent: builder-complex
+— Agent: reviewer
+```
+
+Use only the line matching your role. Subagents sign with their supervising role, not the shared GitHub account name. Post meaningful updates, not idle polling comments.
+
+## Idle GitHub polling
+
+Start the autonomous loop immediately after reading instructions; do not wait for startup confirmation. Approval remains controlled by `status:triage` and the decision authority below.
+
+Use the installed Bash script `.agents/scripts/wait-for-issues.sh`; do not spend model turns repeatedly running `gh issue list` and `sleep`. Poll every **60 seconds** for all roles. An explicit `ZEN_HANDOFF_POLL_SECONDS` override may change this, but do not tune it without human approval.
+
+Create a private, session-local snapshot file outside the repository once (for example, `poll_snapshot=$(mktemp)` in a shell), retain its path, and reuse it for every wait in that session:
+
+```bash
+bash .agents/scripts/wait-for-issues.sh <role-name> "$poll_snapshot"
+```
+
+The script checks immediately, then silently sleeps/rechecks until a nonempty eligible queue changes. It saves and returns a compact snapshot of issue metadata before the agent processes it. This detects new comments/updates without repeatedly waking for unchanged blocked issues. Coordinator's snapshots also include native blockers' completion state. Treat the output as notification, not permission: read full issue history, recheck labels and dependencies, then act.
+
+Keep this wait in one long-running shell invocation using the harness's waiting/background facility; tool timeout or progress checks must not become another model-driven polling loop. On a tool timeout, resume with the same snapshot. Stay interruptible for human input. On API/authentication/rate-limit errors, report the error; do not treat it as an empty queue or retry in a hot loop. Do not recreate the snapshot between waits or run a polling daemon.
 
 ## Human interaction
 

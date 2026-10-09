@@ -39,7 +39,7 @@ if [[ $# == 1 ]]; then
           model: ({providerID: $provider, id: $model} +
             (if $variant == "" then {} else {variant: $variant} end))}')
     session=$(opencode api post /api/session --data "$body" | jq -er '.data.id')
-    prompt="Read AGENTS.md and .agents/roles/$role.md. Act as $role, but wait for user confirmation before starting work."
+    prompt="Read AGENTS.md and .agents/roles/$role.md. Act as $role and start your autonomous work loop immediately. Use .agents/scripts/wait-for-issues.sh for idle GitHub polling. Never act on issues labeled status:triage."
     tmux select-pane -t "$TMUX_PANE" -T "$role"
     exec opencode "$PWD" --session "$session" --prompt "$prompt"
 fi

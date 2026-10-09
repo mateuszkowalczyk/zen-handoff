@@ -45,8 +45,6 @@ Persist any team-relevant outcome from terminal conversation into the relevant i
 When human input is required, comment on the relevant issue:
 
 ```markdown
-HUMAN_DECISION_REQUIRED
-
 @<human-github-username>
 
 <decision needed>
@@ -57,6 +55,10 @@ Options:
 
 Recommendation:
 <optional recommendation>
+
+Outcome: HUMAN_DECISION_REQUIRED
+
+— Agent: coordinator
 ```
 
 Then set:
@@ -69,7 +71,7 @@ human-needed
 
 After the reply:
 
-1. comment `RESOLVED`;
+1. comment the decision and its rationale, signed `— Agent: coordinator`, without a status prefix;
 2. remove `human-needed`;
 3. create/update a PDR/ADR if durable;
 4. route the issue onward.
@@ -77,6 +79,18 @@ After the reply:
 ## Task format
 
 Link task dependencies using GitHub Issues' **blocked by** relationship as well as listing their issue numbers below. If a task cannot start until its dependencies are complete, keep it `role:coordinator` and `status:blocked`; when they are complete, route it to its Builder with `status:ready`.
+
+Do not act on `status:triage` issues, including scoping or dependency edits. Only the human can approve them by replacing that label with `status:ready`.
+
+Use the native GitHub dependency UI or REST API. For example, to make #42 blocked by #17 in the same repository:
+
+```bash
+repo=OWNER/REPO
+blocker_id=$(gh api "repos/$repo/issues/17" --jq '.id')
+gh api --method POST "repos/$repo/issues/42/dependencies/blocked_by" -F issue_id="$blocker_id"
+```
+
+The API requires the blocker's database ID, not its issue number. Before routing a dependent task, verify every blocker delivered the required result (`status:done` and completed closure under the project's close policy). Closing a blocker as not planned/duplicate is not proof of delivery; reconcile scope or dependencies explicitly. Avoid dependency cycles. If native dependencies are unavailable, document `Blocked by #...` in the issue body, keep it blocked, and report the limitation; do not silently omit the dependency or assume the polling script can monitor this fallback automatically.
 
 Use:
 
@@ -145,12 +159,12 @@ When Reviewer comments `PASS` and routes the issue to Coordinator:
 3. comment:
 
 ```markdown
-DONE
-
 <concise outcome summary>
 
 Branch/PR:
 <reference>
+
+— Agent: coordinator
 ```
 
 4. set `status:done`;
@@ -161,7 +175,7 @@ Branch/PR:
 If within your authority:
 
 1. decide;
-2. comment `RESOLVED`;
+2. comment the decision and rationale, signed with your role and without a status prefix;
 3. create/update PDR or ADR if durable;
 4. route onward.
 
@@ -191,29 +205,17 @@ Use the current calendar date when the decision is accepted.
 
 ## Autonomous loop
 
-When idle:
+Start immediately and operate continuously until asked to stop. When idle:
 
 1. synchronize repository when safe;
-2. inspect open issues labeled `role:coordinator`;
+2. use the shared Bash polling mechanism to wait for changed open issues labeled `role:coordinator` with `status:ready` or `status:blocked`, excluding all `status:triage` issues;
 3. prioritize:
    - human replies;
    - `human-needed`;
    - `status:blocked`;
    - Reviewer `PASS`;
    - `DECISION_REQUIRED`;
-4. process actionable work;
-5. otherwise run:
+4. read the full history and process actionable work, including completed dependency checks;
+5. resume the same Bash wait with the same snapshot path; unchanged blocked issues must not cause repeated model turns.
 
-```bash
-sleep 20
-```
-
-6. check again.
-
-Useful query:
-
-```bash
-gh issue list   --state open   --label "role:coordinator"   --limit 100   --json number,title,updatedAt,labels,url
-```
-
-You remain interactive. If the human interrupts an idle sleep, respond normally, persist any team-relevant outcome, then resume the loop.
+You remain interactive. If the human interrupts the Bash wait, respond normally, persist any team-relevant outcome for approved tasks, then resume the loop. Never bypass the triage gate.
