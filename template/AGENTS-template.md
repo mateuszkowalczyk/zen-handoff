@@ -88,6 +88,12 @@ Every handoff has a substantive issue comment and corresponding status label cha
 
 Post meaningful updates, not idle polling comments.
 
+## Writing for humans
+
+All agents should keep issue and PR titles, descriptions, comments, documentation, and human-facing messages concise and easy to understand. Lead with the result, question, or needed action. Use plain language and omit repetition and process narration without losing information needed to act, implement, or review. Use short paragraphs and simple Markdown; add headings, lists, or code blocks only when they improve readability.
+
+Before publishing or sending, always make a final readability pass: remove unnecessary words, check that the meaning and any next action are clear to a human, and verify readable formatting. Preserve required task sections, evidence, and comment signatures.
+
 ## Continuous coordination
 
 The primary agent reassesses the project on startup, after task completion or handoffs, when polling detects changes, and after human messages. Resume active work or start eligible approved work according to priorities and dependencies. Resolve routine blockers within existing authority; when human action is needed, briefly explain the blockers and concrete next steps.
