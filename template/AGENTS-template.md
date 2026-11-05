@@ -36,16 +36,17 @@ status:ready
 status:in-progress
 status:review
 status:blocked
-status:done
 human-needed
 priority:high
 ```
 
-Exactly one `status:*` label should normally be present. `status:triage` wins over every other label: do not claim, analyze, scope, comment on, route, implement, or review a triaged issue. Only the human may remove it. The human approves an issue by replacing `status:triage` with `status:ready`. A terminal request or comment does not bypass this gate. If triage appears during work, stop issue actions and safely preserve local work. New speculative issues start in triage. Approved child tasks may be created within an approved parent's scope.
+Exactly one `status:*` label should normally be present on an open issue. Labels describe stages of open work; GitHub's closed state and reason record its end. `status:triage` wins over every other label: do not claim, analyze, scope, comment on, route, implement, or review a triaged issue. Only the human may remove it. The human approves an issue by replacing `status:triage` with `status:ready`. A terminal request or comment does not bypass this gate. If triage appears during work, stop issue actions and safely preserve local work. New speculative issues start in triage. Approved child tasks may be created within an approved parent's scope.
 
 Check labels and dependencies before every action and handoff. Record dependencies with GitHub Issues' native **blocked by** relationship and in the issue body. Keep a task `status:blocked` until blockers deliver their required result; closure as duplicate or not planned is not proof of delivery. If native dependencies are unavailable, document `Blocked by #...` and check manually.
 
-The primary agent scopes approved issues as one coherent delivery unit with acceptance criteria, Builder tier, dependencies, and constraints. It changes `status:ready` to `status:in-progress` before implementation, then to `status:review` after a validated Builder handoff. A Reviewer `PASS` returns the issue to the primary agent for verification, merge/close under project policy, a completion comment, and `status:done`. `CHANGES_REQUIRED` returns the same branch to the Builder when still available, or a fresh Builder otherwise, followed by a fresh review. `DECISION_REQUIRED` or a blocker moves the issue to `status:blocked` until resolved. Recheck current state before each transition.
+The primary agent scopes approved issues as one coherent delivery unit with acceptance criteria, Builder tier, dependencies, and constraints. It changes `status:ready` to `status:in-progress` before implementation, then to `status:review` after a validated Builder handoff. A Reviewer `PASS` returns the issue to the primary agent for verification, merge under project policy, a completion comment, and closure as **completed**. `CHANGES_REQUIRED` returns the same branch to the Builder when still available, or a fresh Builder otherwise, followed by a fresh review. `DECISION_REQUIRED` or a blocker moves the issue to `status:blocked` until resolved. Recheck current state before each transition.
+
+On closure, remove all `status:*` labels and `human-needed`; do not use a done label. Close delivered work as **completed**. When work is cancelled or closed as a duplicate under project policy, explain why and close it as **not planned**, not completed. Closure alone does not prove that a dependency delivered its required result.
 
 Use this task body structure so a fresh subagent can reconstruct the assignment:
 

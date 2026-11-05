@@ -42,6 +42,8 @@ You can run the workflow entirely through GitHub Issues and comments; direct ter
 2. When you want the agent to act, replace `status:triage` with `status:ready`. No role label or GitHub assignee is needed.
 3. Add context, answer questions, and follow progress in the issue comments. The agent records handoffs and decisions there.
 
-Issues move through `ready → in-progress → review → done`. An issue marked `blocked` needs a dependency or decision. Lasting product and architecture decisions are also recorded under `docs/`.
+Moving an issue from `status:triage` to `status:ready` is the only label change you need to make. After approval, the agent manages workflow labels. When an issue needs your input (`status:blocked` and `human-needed`), simply reply in a comment; leave the labels unchanged. The agent checks your answer, records the decision, removes `human-needed` once your input is sufficient, and resumes work if no other blockers remain. Otherwise, it asks for clarification or keeps the issue blocked.
+
+Issues move through `ready → in-progress → review → closed (completed)`. An issue marked `blocked` needs a dependency or decision. Labels describe only open work: on closure, the agent removes `status:*` and `human-needed`. Cancelled or duplicate issues close as **not planned**, with an explanation; this does not mean their work was delivered. Lasting product and architecture decisions are also recorded under `docs/`.
 
 Detailed agent rules live in the installed `AGENTS.md` and `.agents/` files.
