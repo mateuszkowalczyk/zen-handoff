@@ -30,6 +30,10 @@ Start Zen Handoff.
 
 Adjust the preferred models in `.agents/models.md` to those available in your harness.
 
+## Plan an application or release
+
+Ask the primary agent to help define the goal and scope, then propose a short task list with outcomes, dependencies, and suggested order. Plan broadly and detail the nearest tasks. After you confirm the plan, the agent creates issues in `status:triage`; move selected tasks to `status:ready` when you want implementation to start. A parent issue or milestone is optional.
+
 ## Work through GitHub
 
 You can run the workflow entirely through GitHub Issues and comments; direct terminal conversation is optional.

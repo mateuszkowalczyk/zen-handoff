@@ -20,6 +20,12 @@ Keep a Builder subagent available during an active issue when the harness suppor
 
 Use Builder Simple for localized, clear, low-risk work; Builder Complex for cross-cutting, uncertain, high-risk, or domain-heavy work. Record `Builder tier: simple | complex` in the issue so corrections use the same tier. Reviewer is independent and read-only with respect to implementation. No role label or role-specific session is needed.
 
+## Planning
+
+When starting an application or planning a release, the primary agent clarifies the goal, constraints, and what is out of scope with the human. Propose a short task list with expected outcomes, dependencies, and suggested order. Plan the whole effort broadly and detail the nearest tasks; do not design everything up front.
+
+After the human confirms the plan, create GitHub Issues using the task body structure below and record dependencies. These issues start in `status:triage`; approval of the plan is not approval to implement it. The human starts selected tasks by changing them to `status:ready`. A parent issue or milestone is optional, not required. This planning path does not change the existing rule for child tasks within an already approved parent's scope.
+
 ## Workflow state and approval
 
 GitHub Issues are the source of truth. Use issue bodies and comments, status labels, native dependencies, and linked branches/commits/PRs. Required labels:
