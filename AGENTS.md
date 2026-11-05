@@ -33,9 +33,10 @@ Preserve the core philosophy:
 - use GitHub Issues as durable workflow state;
 - keep the system understandable without a custom orchestration service;
 - keep roles few and responsibilities clear;
-- keep persistent role supervisors lightweight;
-- use fresh isolated subagent context for Builder tasks and Reviewer passes;
-- keep Coordinator human-facing and persistent;
+- run one persistent human-facing primary agent in one repository clone;
+- use a fresh isolated Builder context for each new task and a fresh Reviewer context for each review pass;
+- allow the Builder to retain context through iterations of the same task when useful;
+- let the primary agent manage subagent assignments and handoffs;
 - prefer repository state and GitHub over conversational memory;
 - avoid adding infrastructure unless it solves a demonstrated problem.
 

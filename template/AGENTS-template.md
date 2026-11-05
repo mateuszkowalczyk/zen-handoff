@@ -1,245 +1,111 @@
-# Agent Team Instructions
+# Zen Handoff instructions
 
-## Shared model
+Merge this section into the project's existing `AGENTS.md`. Project-specific instructions still apply.
 
-This repository uses four logical roles:
+## One primary agent
 
-- **Coordinator**
-- **Builder Simple**
-- **Builder Complex**
-- **Reviewer**
+Run one persistent, human-facing primary agent in one repository clone. It owns coordination, issue scope and priority, dependencies, decisions, and final completion. It may delegate bounded implementation and review work to fresh isolated subagents, but it manages their lifecycle, sequencing, and handoffs. No launcher, second role session, or additional clone is required. Do not let concurrent subagents edit or switch the shared worktree.
 
-Role-specific instructions live in `.agents/roles/`.
+Keep the primary context for human conversation and coordination. Use GitHub Issues and repository files for durable state. Record team-relevant outcomes from terminal conversations in the issue or decision record before dependent work continues. Do not rely on conversational memory or private subagent messages as the only record.
 
-Every running agent must read this file and its own role file before starting work and after repository instructions change.
+The primary agent should delegate actual implementation to a Builder subagent and each complete-diff review pass to a separate fresh Reviewer subagent. It focuses on coordination, human interaction, and verifying handoffs rather than doing the Builder's work itself. Start a fresh Builder context for a new issue. If isolated subagents are unavailable, tell the human that independent review cannot run as specified.
 
-## Context model
+## Assigning subagents
 
-Coordinator keeps a persistent main context because it is the human-facing role and benefits from conversational continuity.
+Read `.agents/models.md` and choose a model and reasoning level for each task. These are preferences, not harness-specific definitions. Use the nearest available setting if the harness cannot honor them; use defaults if per-subagent selection is unavailable. Do not create static subagent configurations merely to select models.
 
-Builder Simple, Builder Complex, and Reviewer use a different model:
+For each assignment, include the issue number, scope, acceptance criteria, constraints, branch/base or exact review diff, and the applicable role file in the prompt. Instruct the subagent to read `AGENTS.md`, its `.agents/roles/` file, relevant docs/decisions, and the full issue history. Quote essential role boundaries in the prompt if the harness may not load local files. Give repository and GitHub access as needed. Wait for its handoff and verify durable results before starting another shared-worktree task. The primary agent handles status changes and human communication.
 
-- the persistent parent agent is only a role supervisor;
-- the parent polls GitHub, selects one actionable issue, and spawns a **fresh isolated subagent** for that task or review;
-- the subagent receives the repository instructions, the appropriate role instructions, the issue number, and repository/GitHub access;
-- the subagent performs the complete task/review and writes all durable results to GitHub/repository state;
-- when that unit of work is handed off, the subagent ends and its conversational context is discarded;
-- the persistent parent then resumes polling for the next issue.
+Keep a Builder subagent available during an active issue when the harness supports it and continuity helps: send follow-up instructions to the same subagent for clarification, iterative implementation, and corrections after review. During a Reviewer pass, the Builder must be idle and must not edit the shared worktree. Give every review pass a fresh Reviewer context, independent of the Builder and previous review passes. End the Builder context when the issue is completed or parked for a long time. If the Builder cannot be retained, start a fresh one and reconstruct context from the issue, branch, and repository; never make its private conversation the only source of task state.
 
-The persistent Builder/Reviewer parent must not perform task implementation or review itself.
+Use Builder Simple for localized, clear, low-risk work; Builder Complex for cross-cutting, uncertain, high-risk, or domain-heavy work. Record `Builder tier: simple | complex` in the issue so corrections use the same tier. Reviewer is independent and read-only with respect to implementation. No role label or role-specific session is needed.
 
-A correction after `CHANGES_REQUIRED` should also use a fresh subagent. The new subagent reconstructs context from the task branch, issue body, issue comments, and repository documentation.
+## Workflow state and approval
 
-Durable context belongs in GitHub and the repository, not in previous subagent conversations.
-
-## Workflow state
-
-GitHub Issues are the durable source of truth for current work.
-
-Agents communicate only through:
-
-- issue bodies;
-- issue comments;
-- role/status labels;
-- linked branches, commits, and pull requests.
-
-Do not rely on private agent-to-agent messages as workflow state.
-
-Only one `role:*` label and one `status:*` label should normally be present on an active task.
-
-Coordinator records task dependencies with GitHub Issues' **blocked by** relationship. If a dependency prevents work from starting, keep the task `role:coordinator` and `status:blocked` until Coordinator routes it onward.
-
-### Human approval gate
-
-`status:triage` means the issue is not approved for agent work. All roles must ignore it, even if another actionable status label is also present. Do not claim, analyze, scope, comment on, route, implement, or review it. Only the human may remove or replace `status:triage`; a comment or terminal request does not bypass this label gate.
-
-The human approves a request by replacing `status:triage` with `status:ready` and keeping `role:coordinator`. Check the current labels before every task action or handoff. If the human sets `status:triage` during work, stop further task actions and safely preserve local work without posting to or relabeling the issue.
-
-New speculative/unapproved issues created by agents must also use `role:coordinator` and `status:triage`. Do not create approved child tasks to bypass a triaged parent. Coordinator may route tasks derived from an explicitly approved request without requiring another approval, within the existing decision authority.
-
-## Required labels
+GitHub Issues are the source of truth. Use issue bodies and comments, status labels, native dependencies, and linked branches/commits/PRs. Required labels:
 
 ```text
-role:coordinator
-role:builder-simple
-role:builder-complex
-role:reviewer
-
 status:triage
 status:ready
 status:in-progress
 status:review
 status:blocked
 status:done
-
 human-needed
 priority:high
 ```
 
-## Handoff protocol
+Exactly one `status:*` label should normally be present. `status:triage` wins over every other label: do not claim, analyze, scope, comment on, route, implement, or review a triaged issue. Only the human may remove it. The human approves an issue by replacing `status:triage` with `status:ready`. A terminal request or comment does not bypass this gate. If triage appears during work, stop issue actions and safely preserve local work. New speculative issues start in triage. Approved child tasks may be created within an approved parent's scope.
 
-Every handoff consists of:
+Check labels and dependencies before every action and handoff. Record dependencies with GitHub Issues' native **blocked by** relationship and in the issue body. Keep a task `status:blocked` until blockers deliver their required result; closure as duplicate or not planned is not proof of delivery. If native dependencies are unavailable, document `Blocked by #...` and check manually.
 
-1. a structured issue comment;
-2. replacing the current `role:*` label with the next role;
-3. replacing the current `status:*` label with the next status.
+The primary agent scopes approved issues as one coherent delivery unit with acceptance criteria, Builder tier, dependencies, and constraints. It changes `status:ready` to `status:in-progress` before implementation, then to `status:review` after a validated Builder handoff. A Reviewer `PASS` returns the issue to the primary agent for verification, merge/close under project policy, a completion comment, and `status:done`. `CHANGES_REQUIRED` returns the same branch to the Builder when still available, or a fresh Builder otherwise, followed by a fresh review. `DECISION_REQUIRED` or a blocker moves the issue to `status:blocked` until resolved. Recheck current state before each transition.
 
-Comments must start with substantive content, never a lifecycle status or standalone status marker. Labels are the only source of lifecycle status; do not prepend `CLAIMED`, `PROGRESS`, `BLOCKED`, `READY_FOR_REVIEW`, `RESOLVED`, or `DONE`.
+Use this task body structure so a fresh subagent can reconstruct the assignment:
 
-Review outcomes and decision/routing requests are distinct from lifecycle status. When needed, include one of these in an `Outcome: <marker>` field after the substantive content:
+```markdown
+## Outcome
+<one coherent result>
 
-```text
-TIER_CHANGE_REQUIRED
-PASS
-CHANGES_REQUIRED
-DECISION_REQUIRED
-HUMAN_DECISION_REQUIRED
+## Builder tier
+simple | complex
+
+## Acceptance
+- <observable condition>
+
+## Dependencies
+<issue numbers or None>
+
+## Context
+<relevant background>
+
+## Constraints
+<constraints or None>
+
+## Builder notes
+Pending
+
+## Validation
+Pending
+
+## Review
+Pending
 ```
 
-There is no hidden routing state.
+When a task is too large for one implementation and review boundary, split it into independently deliverable issues. A Builder that finds its tier unsuitable or a protected decision unresolved reports this to the primary agent; it does not silently expand scope. For a review handoff, record the branch/commit/PR, validation results, files changed, and known risks. The Reviewer records specific actionable findings or evidence for `PASS`. The primary agent checks the handoff before updating labels.
 
-Every agent-authored GitHub comment (including PR comments and subagent comments) must end with exactly one role signature:
+Every handoff has a substantive issue comment and corresponding status label change. Labels express lifecycle state; comments should not start with `CLAIMED`, `PROGRESS`, `BLOCKED`, `READY_FOR_REVIEW`, `RESOLVED`, or `DONE`. When useful, place `Outcome: PASS`, `CHANGES_REQUIRED`, `DECISION_REQUIRED`, `TIER_CHANGE_REQUIRED`, or `HUMAN_DECISION_REQUIRED` after the explanation. Every agent-authored GitHub issue or PR comment, including subagent comments, ends with exactly:
 
 ```text
-— Agent: coordinator
-— Agent: builder-simple
-— Agent: builder-complex
-— Agent: reviewer
+— Agent
 ```
 
-Use only the line matching your role. Subagents sign with their supervising role, not the shared GitHub account name. Post meaningful updates, not idle polling comments.
+Post meaningful updates, not idle polling comments.
 
-## Idle GitHub polling
+## Idle waiting
 
-Start the autonomous loop immediately after reading instructions; do not wait for startup confirmation. Approval remains controlled by `status:triage` and the decision authority below.
-
-Use the installed Bash script `.agents/scripts/wait-for-issues.sh`; do not spend model turns repeatedly running `gh issue list` and `sleep`. Poll every **60 seconds** for all roles. An explicit `ZEN_HANDOFF_POLL_SECONDS` override may change this, but do not tune it without human approval.
-
-Create a private, session-local snapshot file outside the repository once (for example, `poll_snapshot=$(mktemp)` in a shell), retain its path, and reuse it for every wait in that session:
+Start the autonomous loop after reading instructions. When idle, use `.agents/scripts/wait-for-issues.sh` with one private snapshot file outside the repository:
 
 ```bash
-bash .agents/scripts/wait-for-issues.sh <role-name> "$poll_snapshot"
+poll_snapshot=$(mktemp)
+bash .agents/scripts/wait-for-issues.sh "$poll_snapshot"
 ```
 
-The script checks immediately, then silently sleeps/rechecks until a nonempty eligible queue changes. It saves and returns a compact snapshot of issue metadata before the agent processes it. This detects new comments/updates without repeatedly waking for unchanged blocked issues. Coordinator's snapshots also include native blockers' completion state. Treat the output as notification, not permission: read full issue history, recheck labels and dependencies, then act.
+The script checks immediately, then silently polls every 60 seconds until the eligible queue or a native blocker changes. Reuse the same snapshot for later waits. Treat its output as notification: read full issue history and recheck labels/dependencies before acting. Keep the wait interruptible for human input. Report API/authentication errors; do not treat them as an empty queue. `ZEN_HANDOFF_POLL_SECONDS` may override the interval when explicitly configured.
 
-Keep this wait in one long-running shell invocation using the harness's waiting/background facility; tool timeout or progress checks must not become another model-driven polling loop. On a tool timeout, resume with the same snapshot. Stay interruptible for human input. On API/authentication/rate-limit errors, report the error; do not treat it as an empty queue or retry in a hot loop. Do not recreate the snapshot between waits or run a polling daemon.
+## Human interaction and decisions
 
-## Human interaction
+Only the primary agent talks to the human. The human may communicate entirely through GitHub Issues and comments; treat relevant comments on approved issues as input and respond there. Direct terminal conversation is optional. Subagents report questions and findings to the primary agent. Ask for a human decision before changing intended product behavior, materially expanding or removing approved scope, making lasting product or architecture trade-offs, changing public API compatibility or persistent data/migration strategy, deciding authentication/authorization/privacy/security policy, performing destructive or difficult-to-reverse work, or introducing a paid service or material recurring cost.
 
-Only Coordinator normally interacts with the human.
+The primary agent may scope clear requests, prioritize and split tasks, select a Builder tier, set dependencies, route review outcomes, and resolve routine blockers. Builders choose implementation details within approved scope. Reviewer can require material corrections but does not implement them.
 
-The human may talk directly to Coordinator in its terminal.
+When human input is required, explain the decision in an issue comment with `Outcome: HUMAN_DECISION_REQUIRED`, add `human-needed`, and set `status:blocked`. After the reply, record the decision and rationale, remove `human-needed`, update lasting documentation, and resume work.
 
-If terminal conversation changes task scope, priority, acceptance criteria, product behavior, architecture, Builder tier, or another fact needed by other roles, Coordinator must persist it before dependent work continues.
+Accepted product/design decisions use PDRs; architecture/technical decisions use ADRs. Create them under `docs/decisions/` from `.agents/templates/` with names `YYYYMMDD-PDR-short-name.md` and `YYYYMMDD-ADR-short-name.md`. Keep `docs/product.md` and `docs/architecture.md` consistent.
 
-Builders and Reviewer never ask the human directly.
+## One repository clone
 
-## Decision authority
-
-Human decision is required before:
-
-- changing intended product behavior;
-- materially expanding or removing approved scope after work begins;
-- choosing a meaningful product/design trade-off with lasting consequences;
-- choosing a meaningful architecture trade-off with lasting maintenance consequences;
-- changing public API compatibility;
-- changing a persistent data model or migration strategy;
-- making authentication, authorization, privacy, or security policy decisions;
-- performing destructive or difficult-to-reverse operations;
-- introducing a paid external service or material recurring cost.
-
-Coordinator may normally:
-
-- create and prioritize tasks from clear human requests;
-- define outcome and acceptance criteria without changing intended behavior;
-- choose Builder Simple or Builder Complex;
-- split oversized work into independent issues;
-- define dependencies;
-- route blockers and review results.
-
-Builders may normally decide:
-
-- implementation architecture inside approved behavior and scope;
-- module boundaries;
-- local abstractions;
-- implementation details and names;
-- straightforward refactors required by the task;
-- automated test strategy and direct-validation procedure.
-
-Reviewer may require material corrections or return unresolved decisions to Coordinator, but must not implement fixes.
-
-## Durable decisions
-
-Important decisions must not remain only in issue comments.
-
-Use:
-
-```text
-docs/product.md
-docs/architecture.md
-docs/decisions/
-```
-
-Coordinator creates decision records in `docs/decisions/` from the PDR and ADR templates in `.agents/templates/`. Keep the templates out of `docs/decisions/`.
-
-Naming convention:
-
-```text
-YYYYMMDD-PDR-short-name.md
-YYYYMMDD-ADR-short-name.md
-```
-
-Use PDR for product/design decisions.
-
-Use ADR for architecture/technical decisions.
-
-Coordinator owns accepted PDRs/ADRs and keeps `docs/product.md` and `docs/architecture.md` materially consistent with them.
-
-## Repository synchronization
-
-Each role normally runs in its own clone.
-
-Before new work:
-
-```bash
-git status
-git fetch origin --prune
-```
-
-If the working tree is clean and the agent is on the default branch, fast-forward it from origin.
-
-Builders start new task branches from the latest remote default branch.
-
-Reviewer fetches origin and reviews the exact branch/commit/PR referenced by the task.
-
-Do not blindly pull or merge the default branch into an active task branch.
-
-After synchronization, re-read this file, the active role file, and relevant PDRs/ADRs before taking new work.
-
-## Task sizing
-
-One issue should represent one coherent delivery unit:
-
-- one Builder tier;
-- one Builder context;
-- one complete-diff review boundary.
-
-If work cannot be implemented and reviewed confidently as one unit, Coordinator splits it.
-
-Builders must not silently broaden task scope.
-
-## Review discipline
-
-Implementation is not final until independent review returns `PASS`.
-
-`CHANGES_REQUIRED` goes directly back to the original Builder tier.
-
-`DECISION_REQUIRED` goes to Coordinator.
-
-After corrections, Builder performs fresh validation and routes the complete result back to Reviewer.
-
-Reviewer never fixes its own findings.
+Before new work, inspect `git status` and fetch origin. Fast-forward a clean default branch when safe. Create a task branch from the latest remote default branch, or resume its existing branch for corrections. Complete or safely park one task before switching branches. Reviewer inspects the exact branch/commit/PR against its intended base after Builder finishes; it does not edit the worktree. Do not blindly pull or merge the default branch into an active task branch. Re-read changed instructions and relevant decisions after synchronization.
 
 ## Security
 
