@@ -20,6 +20,12 @@ Keep a Builder subagent available during an active issue when the harness suppor
 
 Use Builder Simple for localized, clear, low-risk work; Builder Complex for cross-cutting, uncertain, high-risk, or domain-heavy work. Record `Builder tier: simple | complex` in the issue so corrections use the same tier. Reviewer is independent and read-only with respect to implementation. No role label or role-specific session is needed.
 
+## Startup configuration check
+
+On startup, check that GitHub Issues are enabled, the required labels below exist, and a task request form is present under `.github/ISSUE_TEMPLATE/` on the default branch. The form should collect an outcome, acceptance criteria, context/constraints, and dependencies, require only the outcome, and apply `status:triage`. An equivalent existing form is sufficient.
+
+If configuration is missing, briefly list the gaps and offer to complete setup. Only after human approval, enable Issues, create missing labels, and add a **Task request** form where needed, preserving existing settings and forms. Follow project policy for committing and merging the form onto the default branch. Report access or authentication failures separately; do not treat them as missing configuration. If setup is complete, continue without a setup announcement.
+
 ## Planning
 
 When starting an application or planning a release, the primary agent clarifies the goal, constraints, and what is out of scope with the human. Propose a short task list with expected outcomes, dependencies, and suggested order. Plan the whole effort broadly and detail the nearest tasks; do not design everything up front.

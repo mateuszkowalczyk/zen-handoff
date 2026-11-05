@@ -30,6 +30,8 @@ Start Zen Handoff.
 
 Adjust the preferred models in `.agents/models.md` to those available in your harness.
 
+On startup, the agent checks GitHub Issues, required labels, and the request form. If anything is missing, it offers to complete setup with your approval.
+
 ## Plan an application or release
 
 Ask the primary agent to help define the goal and scope, then propose a short task list with outcomes, dependencies, and suggested order. Plan broadly and detail the nearest tasks. After you confirm the plan, the agent creates issues in `status:triage`; move selected tasks to `status:ready` when you want implementation to start. A parent issue or milestone is optional.
@@ -38,7 +40,7 @@ Ask the primary agent to help define the goal and scope, then propose a short ta
 
 You can run the workflow entirely through GitHub Issues and comments; direct terminal conversation is optional.
 
-1. Submit an issue with the **Zen Handoff request** form. It starts in `status:triage`.
+1. On GitHub, open the repository's **Issues → New issue**, choose **Task request**, and fill in the form. Use this form for new tasks; only **Outcome** is required. Submitted issues start in `status:triage`.
 2. When you want the agent to act, replace `status:triage` with `status:ready`. No role label or GitHub assignee is needed.
 3. Add context, answer questions, and follow progress in the issue comments. The agent records handoffs and decisions there.
 

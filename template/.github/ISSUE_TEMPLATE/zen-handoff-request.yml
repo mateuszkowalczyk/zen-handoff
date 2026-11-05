@@ -1,4 +1,4 @@
-name: Zen Handoff request
+name: Task request
 description: Submit an idea or task; held in triage until you approve it.
 labels: ["status:triage"]
 body:
