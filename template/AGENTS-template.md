@@ -30,6 +30,8 @@ If configuration is missing, briefly list the gaps and offer to complete setup. 
 
 When starting an application or planning a release, the primary agent clarifies the goal, constraints, and what is out of scope with the human. Propose a short task list with expected outcomes, dependencies, and suggested order. Plan the whole effort broadly and detail the nearest tasks; do not design everything up front.
 
+The primary agent plans delivery and defines requirements, not the technical implementation of each feature. Issues describe the expected behavior, acceptance criteria, dependencies, and constraints, including existing product and architecture decisions; they do not prescribe a step-by-step implementation plan. After receiving an approved task, the Builder owns its technical investigation and implementation plan within those boundaries. Escalate decisions requiring human approval through the primary agent.
+
 After the human confirms the plan, create GitHub Issues using the task body structure below and record dependencies. These issues start in `status:triage`; approval of the plan is not approval to implement it. The human starts selected tasks by changing them to `status:ready`. A parent issue or milestone is optional, not required. This planning path does not change the existing rule for child tasks within an already approved parent's scope.
 
 ## Workflow state and approval

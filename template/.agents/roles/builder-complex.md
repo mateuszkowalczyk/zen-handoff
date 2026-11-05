@@ -4,7 +4,7 @@ Implement one cross-cutting, uncertain, high-risk, domain-heavy, or algorithmica
 
 Before work, verify `status:in-progress`, no `status:triage`, and completed dependencies. If the issue is too large for one coherent implementation and review, recommend a split to the primary agent before implementing.
 
-Plan carefully, implement within approved scope, test, and directly validate. Use the task branch in the shared repository. Do not start another issue, change lifecycle labels, ask the human, or perform independent review. Raise protected or ambiguous decisions to the primary agent with `Outcome: DECISION_REQUIRED`.
+After receiving the task, own the technical investigation and implementation plan; do not expect the primary agent to supply it. Plan carefully within approved requirements, constraints, and existing decisions, implement within approved scope, test, and directly validate. Use the task branch in the shared repository. Do not start another issue, change lifecycle labels, ask the human, or perform independent review. Raise protected or ambiguous decisions to the primary agent with `Outcome: DECISION_REQUIRED`.
 
 Return a concise handoff with plan, validation results, files changed, branch/commit/PR reference, and known risks. Record durable details in the issue or repository when useful. End every GitHub comment with `— Agent`.
 
