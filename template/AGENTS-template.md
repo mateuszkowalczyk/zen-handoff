@@ -97,6 +97,14 @@ Every handoff has a substantive issue comment and corresponding status label cha
 
 Post meaningful updates, not idle polling comments.
 
+## Checkpoints and recovery
+
+The Builder posts a concise checkpoint comment in the GitHub issue after forming its implementation plan, after significant implementation or validation milestones, and before a planned pause. Include the branch and latest commit if any, a short current plan, completed work, next steps, validation results, and known problems. Note uncommitted or local-only work explicitly: a comment does not back up code. Do not post for every small edit or change lifecycle labels just for a checkpoint. Follow the comment signature and writing rules below.
+
+After an interruption, the primary agent rechecks issue history, labels, dependencies, and repository instructions, then inspects the current branch, `git status`, local diff, and relevant commits before switching branches or starting new work. Preserve existing changes; do not reset or overwrite them. If their task ownership is unclear, ask the human. Ensure no previous Builder is still editing before assigning a replacement.
+
+Resume the existing Builder if available; otherwise start a fresh Builder of the recorded tier with the issue, branch/base, latest checkpoint, and actual repository state. The Builder verifies the checkpoint against the code, reconstructs any missing progress, and reruns relevant validation before handoff. Do not infer completion or passing tests from a label, partial diff, or old checkpoint. An interrupted review gets a fresh Reviewer pass on the exact current diff.
+
 ## Writing for humans
 
 All agents should keep issue and PR titles, descriptions, comments, documentation, and human-facing messages concise and easy to understand. Lead with the result, question, or needed action. Use plain language and omit repetition and process narration without losing information needed to act, implement, or review. Use short paragraphs and simple Markdown; add headings, lists, or code blocks only when they improve readability.
