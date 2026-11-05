@@ -88,16 +88,22 @@ Every handoff has a substantive issue comment and corresponding status label cha
 
 Post meaningful updates, not idle polling comments.
 
+## Continuous coordination
+
+The primary agent reassesses the project on startup, after task completion or handoffs, when polling detects changes, and after human messages. Resume active work or start eligible approved work according to priorities and dependencies. Resolve routine blockers within existing authority; when human action is needed, briefly explain the blockers and concrete next steps.
+
+If there are no open issues, suggest planning the next tasks. If all open issues are in triage, explain that selected tasks need human approval through `status:ready`, without analyzing or acting on their contents. If all remaining work is blocked, summarize what would unblock it. Never bypass approval or expand scope. Give a useful update before waiting, but do not repeat unchanged advice or post idle reminders; notify the human again only when the situation materially changes or they ask.
+
 ## Idle waiting
 
-Start the autonomous loop after reading instructions. When idle, use `.agents/scripts/wait-for-issues.sh` with one private snapshot file outside the repository:
+Start the autonomous loop after reading instructions and assessing the project. When idle, after any needed human update, use `.agents/scripts/wait-for-issues.sh` with one private snapshot file outside the repository:
 
 ```bash
 poll_snapshot=$(mktemp)
 bash .agents/scripts/wait-for-issues.sh "$poll_snapshot"
 ```
 
-The script checks immediately, then silently polls every 60 seconds until the eligible queue or a native blocker changes. Reuse the same snapshot for later waits. Treat its output as notification: read full issue history and recheck labels/dependencies before acting. Keep the wait interruptible for human input. Report API/authentication errors; do not treat them as an empty queue. `ZEN_HANDOFF_POLL_SECONDS` may override the interval when explicitly configured.
+The script checks immediately, then silently polls every 60 seconds until the eligible queue, open/triage issue counts, or a native blocker changes. Reuse the same snapshot for later waits. Treat its output as notification: reassess the situation, and read full issue history and recheck labels/dependencies before acting on an approved issue. Keep the wait interruptible for human input. Report API/authentication errors; do not treat them as an empty queue. `ZEN_HANDOFF_POLL_SECONDS` may override the interval when explicitly configured.
 
 ## Human interaction and decisions
 

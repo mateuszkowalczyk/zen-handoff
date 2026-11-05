@@ -22,6 +22,11 @@ while true; do
     # they must never be treated as an empty queue or retried in a hot loop.
     issues=$(gh api --paginate --slurp \
         "repos/$repo/issues?state=open&per_page=100")
+    counts=$(jq -cS '
+        [.[][] | select(.pull_request == null)]
+        | {open: length,
+           triage: ([.[] | select(any(.labels[]; .name == "status:triage"))] | length)}
+    ' <<< "$issues")
     queue=$(jq -cS --argjson statuses "$statuses" '
         [ .[][] | select(.pull_request == null)
           | .labels = ([.labels[].name] | sort)
@@ -45,8 +50,9 @@ while true; do
 
     current=$(jq -ncS --arg repo "$repo" \
         --argjson queue "$queue" --argjson dependencies "$dependencies" \
-        '{repo: $repo, queue: $queue, dependencies: $dependencies}')
-    if [[ $queue != '[]' && $current != "$previous" ]]; then
+        --argjson counts "$counts" \
+        '{repo: $repo, queue: $queue, dependencies: $dependencies, counts: $counts}')
+    if [[ $current != "$previous" ]]; then
         printf '%s\n' "$current" > "$snapshot_file"
         printf '%s\n' "$current"
         exit 0
