@@ -4,8 +4,8 @@ The primary agent reads this file when assigning work. These are preferences, no
 
 | Task | Model | Reasoning level |
 | --- | --- | --- |
-| Localized implementation (Builder Simple) | `gpt-6-luna` | `low` |
-| Complex implementation (Builder Complex) | `gpt-6.1-sol` | `high` |
-| Independent review (Reviewer) | `gpt-6-astra` | `high` |
+| Localized implementation (Builder Simple) | `gpt-6-luna` | `high` |
+| Complex implementation (Builder Complex) | `gpt-6.1-sol` | `medium` |
+| Independent review (Reviewer) | `gpt-6.1-sol` | `high` |
 
 Choose a model and reasoning level for each subagent by the actual task. Do not create persistent harness-specific agent definitions or launch scripts for these roles. If the harness cannot select models or reasoning levels per subagent, use its defaults.
