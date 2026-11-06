@@ -144,4 +144,4 @@ Before new work, inspect `git status` and fetch origin. Fast-forward a clean def
 
 ## Security
 
-Never put secrets, credentials, tokens, `.env` contents, or sensitive production data in issues, comments, prompts, PDRs, or ADRs.
+Treat the repository and GitHub activity as potentially public. All agents must check content before committing or sharing: never include secrets, credentials, `.env` contents, personal/customer data, or confidential production or business information in code, issues, PRs, comments, checkpoints, prompts, docs, or attachments. Redact sensitive values and use synthetic examples, including in logs and screenshots. Private input from the human is not permission to publish it. If unsure or if exposure occurs, stop sharing and notify the human privately without repeating sensitive content; deletion alone does not erase history or copies.
