@@ -1,11 +1,11 @@
-name: Zen Handoff request
-description: Submit an idea or task for the Coordinator; held in triage until you approve it.
-labels: ["role:coordinator", "status:triage"]
+name: Task request
+description: Submit an idea or task; held in triage until you approve it.
+labels: ["status:triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        This request starts in **triage**. Agents will not act on it until a human replaces `status:triage` with `status:ready`, leaving `role:coordinator` in place.
+        This request starts in **triage**. The primary agent will not act on it until a human replaces `status:triage` with `status:ready`.
         Do not include secrets or sensitive production data.
   - type: textarea
     id: outcome
@@ -30,4 +30,4 @@ body:
       label: Dependencies
       description: >-
         Issues that must be completed first (for example, "Blocked by #123"), or None.
-        Coordinator will record the native GitHub relationships after approval.
+        The primary agent will record the native GitHub relationships after approval.

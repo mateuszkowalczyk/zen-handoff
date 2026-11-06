@@ -12,14 +12,14 @@ import unittest
 SCRIPT = Path(__file__).resolve().parents[1] / "template/.agents/scripts/wait-for-issues.sh"
 
 
-def issue(number=1, role="coordinator", status="ready", **changes):
+def issue(number=1, status="ready", **changes):
     result = {
         "number": number,
         "title": "Task",
         "html_url": f"https://github.com/example/project/issues/{number}",
         "updated_at": "2026-10-09T12:00:00Z",
         "comments": 0,
-        "labels": [{"name": f"role:{role}"}, {"name": f"status:{status}"}],
+        "labels": [{"name": f"status:{status}"}],
     }
     result.update(changes)
     return result
@@ -66,12 +66,12 @@ fi
 ''')
         sleep.chmod(0o755)
 
-    def run_poll(self, fixtures, role="coordinator", interval=None):
+    def run_poll(self, fixtures, interval=None):
         (self.root / "fixtures.json").write_text(json.dumps(fixtures))
         if interval is not None:
             self.env["ZEN_HANDOFF_POLL_SECONDS"] = interval
         return subprocess.run(
-            ["bash", str(SCRIPT), role, str(self.snapshot)],
+            ["bash", str(SCRIPT), str(self.snapshot)],
             env=self.env, capture_output=True, text=True, timeout=5,
         )
 
@@ -111,7 +111,7 @@ fi
         self.assertEqual(output["queue"][0]["comments"], 1)
         self.assertEqual((self.root / "sleeps").read_text(), "60\n")
 
-    def test_blocker_completion_wakes_coordinator_without_issue_update(self):
+    def test_blocker_completion_wakes_primary_agent_without_issue_update(self):
         blocked = issue(status="blocked")
         blocker = issue(17, state="open", state_reason=None)
         first = {"pages": [[blocked]], "blockers": [[blocker]]}
@@ -124,19 +124,16 @@ fi
         self.assertEqual(output["dependencies"][0]["blockedBy"][0]["state_reason"], "completed")
         self.assertEqual((self.root / "sleeps").read_text(), "60\n")
 
-    def test_builder_and_reviewer_queues(self):
-        for role, status in [("builder-simple", "ready"), ("builder-complex", "ready"), ("reviewer", "review")]:
-            with self.subTest(role=role):
-                output = self.output(self.run_poll([{"pages": [[
-                    issue(1, role, status), issue(2, role, "blocked"),
-                    issue(3, role, "triage"), issue(4, "coordinator", "ready"),
-                ]]}], role=role))
-                self.assertEqual([item["number"] for item in output["queue"]], [1])
-                self.assertEqual(output["dependencies"], [])
+    def test_one_queue_contains_all_active_statuses(self):
+        output = self.output(self.run_poll([{"pages": [[
+            issue(1, "ready"), issue(2, "review"), issue(3, "in-progress"),
+            issue(4, "blocked"), issue(5, "done"), issue(6, "triage"),
+        ]]}]))
+        self.assertEqual([item["number"] for item in output["queue"]], [1, 2, 3, 4])
 
-    def test_prs_and_conflicting_labels_are_excluded(self):
+    def test_prs_and_conflicting_status_labels_are_excluded(self):
         conflicting = issue(2)
-        conflicting["labels"].append({"name": "role:reviewer"})
+        conflicting["labels"].append({"name": "status:review"})
         output = self.output(self.run_poll([{"pages": [[
             issue(1, pull_request={"url": "example"}), conflicting, issue(3),
         ]]}]))
@@ -151,10 +148,10 @@ fi
         self.assertEqual(result.stdout, "")
         self.assertEqual(self.snapshot.read_text(), "previous snapshot")
 
-    def test_invalid_role_and_interval_fail_before_github(self):
-        for role, interval in [("unknown", "60"), ("coordinator", "0"), ("coordinator", "oops")]:
-            with self.subTest(role=role, interval=interval):
-                result = self.run_poll([], role=role, interval=interval)
+    def test_invalid_interval_fails_before_github(self):
+        for interval in ["0", "oops"]:
+            with self.subTest(interval=interval):
+                result = self.run_poll([], interval=interval)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertFalse((self.root / "counter").exists())
 
