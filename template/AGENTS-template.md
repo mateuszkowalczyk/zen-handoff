@@ -142,6 +142,12 @@ When human input is required, explain the decision in an issue comment with `Out
 
 Accepted product/design decisions use PDRs; architecture/technical decisions use ADRs. Create them under `docs/decisions/` from `.agents/templates/` with names `YYYYMMDD-PDR-short-name.md` and `YYYYMMDD-ADR-short-name.md`. Keep `docs/product.md` and `docs/architecture.md` consistent.
 
+## Interactive manual testing
+
+When testing needs the human or an external device, keep the same Builder available when possible. The Builder supplies concise steps, expected results, and needed diagnostics; the primary agent guides the human through them without returning to the Builder after every step. Send results back in a batch, or sooner when analysis or code changes are needed. The Builder provides fixes and only the necessary retest steps. Record meaningful results in the issue, not every exchange; never batch away a safety concern or continue an unsafe test.
+
+Keep test iterations within the same task, without a separate issue or review for each attempt. Review the final task diff; code changes after review require a fresh review pass. Only the primary agent talks to the human.
+
 ## One repository clone
 
 Before new work, inspect `git status` and fetch origin. Fast-forward a clean default branch when safe. Create a task branch from the latest remote default branch, or resume its existing branch for corrections. Complete or safely park one task before switching branches. Reviewer inspects the exact branch/commit/PR against its intended base after Builder finishes; it does not edit the worktree. Do not blindly pull or merge the default branch into an active task branch. Re-read changed instructions and relevant decisions after synchronization.
