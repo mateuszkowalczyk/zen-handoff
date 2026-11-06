@@ -1,8 +1,19 @@
 # Zen Handoff
 
-Zen Handoff lets you develop software through one coding agent. You describe the work; the agent coordinates implementation and review. GitHub Issues and the repository keep the shared record.
+Zen Handoff's goal is to **reduce cognitive load, not create more of it**, while keeping you in control of software development.
 
-> request → issue → implementation → independent review → completion
+You describe the work; one coding agent coordinates implementation and review. Project knowledge stays in your repository, while GitHub Issues describe tasks and track their progress.
+
+```mermaid
+flowchart LR
+    Human["You"] <-->|Goals and decisions| Primary["Primary agent"]
+    Primary -->|Task or revisions| Builder["Builder"]
+    Builder -->|Implementation| Primary
+    Primary -->|Independent review request| Reviewer["Reviewer"]
+    Reviewer -->|Findings or approval| Primary
+    Primary <-->|Tasks, progress, and handoffs| Issues["GitHub Issues"]
+    Human <-->|Requests, answers, and progress| Issues
+```
 
 > **Security warning:** Zen Handoff is not yet ready for use with public issues. Use it only in private repositories where everyone who can post or edit issues and comments is trusted. The workflow does not yet define how agents verify who may approve work or make decisions; untrusted content could be mistaken for instructions or approval.
 
