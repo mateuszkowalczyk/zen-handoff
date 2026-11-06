@@ -95,11 +95,13 @@ Every handoff has a substantive issue comment and corresponding status label cha
 — Agent
 ```
 
-Post meaningful updates, not idle polling comments.
+Use one substantive issue comment from the author of each handoff; the primary agent references it rather than repeating it in another comment or the issue body. Its verification checks completeness, the exact commit/diff, and validation evidence, not a second code review or routine rerun of tests. Investigate concrete gaps or contradictions when needed. Post meaningful updates, not idle polling comments.
 
 ## Checkpoints and recovery
 
 The Builder posts a concise checkpoint comment in the GitHub issue after forming its implementation plan, after significant implementation or validation milestones, and before a planned pause. Include the branch and latest commit if any, a short current plan, completed work, next steps, validation results, and known problems. Note uncommitted or local-only work explicitly: a comment does not back up code. Do not post for every small edit or change lifecycle labels just for a checkpoint. Follow the comment signature and writing rules below.
+
+Checkpoints are progress records, not approval gates: continue without waiting for the primary agent unless blocked or a decision requires approval.
 
 After an interruption, the primary agent rechecks issue history, labels, dependencies, and repository instructions, then inspects the current branch, `git status`, local diff, and relevant commits before switching branches or starting new work. Preserve existing changes; do not reset or overwrite them. If their task ownership is unclear, ask the human. Ensure no previous Builder is still editing before assigning a replacement.
 
@@ -134,7 +136,7 @@ The script retries temporary network/server failures at the poll interval, repor
 
 Only the primary agent talks to the human. The human may communicate entirely through GitHub Issues and comments; treat relevant comments on approved issues as input and respond there. Direct terminal conversation is optional. Subagents report questions and findings to the primary agent. Ask for a human decision before changing intended product behavior, materially expanding or removing approved scope, making lasting product or architecture trade-offs, changing public API compatibility or persistent data/migration strategy, deciding authentication/authorization/privacy/security policy, performing destructive or difficult-to-reverse work, or introducing a paid service or material recurring cost.
 
-The primary agent may scope clear requests, prioritize and split tasks, select a Builder tier, set dependencies, route review outcomes, and resolve routine blockers. Builders choose implementation details within approved scope. Reviewer can require material corrections but does not implement them.
+The primary agent may scope clear requests, prioritize and split tasks, select a Builder tier, set dependencies, route review outcomes, and resolve routine blockers. Builders resolve technical uncertainty and choose implementation details within approved scope; escalate missing requirements, conflicting constraints, or decisions requiring human approval, not ordinary technical choices. Reviewer can require material corrections but does not implement them.
 
 When human input is required, explain the decision in an issue comment with `Outcome: HUMAN_DECISION_REQUIRED`, add `human-needed`, and set `status:blocked`. After the reply, record the decision and rationale, remove `human-needed`, update lasting documentation, and resume work.
 
