@@ -11,16 +11,38 @@ if [[ $# != 1 || ! $interval =~ ^[1-9][0-9]*$ ]]; then
 fi
 statuses='["status:ready","status:in-progress","status:review","status:blocked"]'
 
-repo=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
+# Retry temporary connectivity/server failures without replacing the snapshot.
+github() {
+    local output warned=0
+    while true; do
+        if output=$(gh "$@" 2>&1); then
+            if (( warned )); then
+                echo 'GitHub connection restored; monitoring continues.' >&2
+            fi
+            printf '%s\n' "$output"
+            return 0
+        fi
+        if ! grep -Eqi 'HTTP (5[0-9]{2}|429)|error connecting|could not resolve|no such host|network is unreachable|connection (refused|reset)|timed? out|timeout|TLS handshake|unexpected EOF' <<< "$output"; then
+            printf '%s\n' "$output" >&2
+            return 1
+        fi
+        if (( ! warned )); then
+            echo 'GitHub temporarily unavailable; retrying at the poll interval.' >&2
+            warned=1
+        fi
+        sleep "$interval"
+    done
+}
+
+repo=$(github repo view --json nameWithOwner --jq '.nameWithOwner')
 previous=''
 if [[ -s $snapshot_file ]]; then
     previous=$(cat -- "$snapshot_file")
 fi
 
 while true; do
-    # Paginate rather than silently truncating the queue. API failures exit;
-    # they must never be treated as an empty queue or retried in a hot loop.
-    issues=$(gh api --paginate --slurp \
+    # Paginate rather than silently truncating the queue.
+    issues=$(github api --paginate --slurp \
         "repos/$repo/issues?state=open&per_page=100")
     counts=$(jq -cS '
         [.[][] | select(.pull_request == null)]
@@ -40,7 +62,7 @@ while true; do
     dependencies='[]'
     # A blocker can change without updating the dependent issue itself.
     for number in $(jq -r '.[] | select(.labels | index("status:blocked")) | .number' <<< "$queue"); do
-        blockers=$(gh api --paginate --slurp \
+        blockers=$(github api --paginate --slurp \
             "repos/$repo/issues/$number/dependencies/blocked_by?per_page=100")
         blockers=$(jq -cS '[.[][] | {number, url: .html_url, state,
             state_reason, labels: ([.labels[].name] | sort)}] | sort_by(.url)' <<< "$blockers")

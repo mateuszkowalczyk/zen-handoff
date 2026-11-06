@@ -128,6 +128,8 @@ bash .agents/scripts/wait-for-issues.sh "$poll_snapshot"
 
 The script checks immediately, then silently polls every 60 seconds until the eligible queue, open/triage issue counts, or a native blocker changes. Reuse the same snapshot for later waits. Treat its output as notification: reassess the situation, and read full issue history and recheck labels/dependencies before acting on an approved issue. Keep the wait interruptible for human input. Report API/authentication errors; do not treat them as an empty queue. `ZEN_HANDOFF_POLL_SECONDS` may override the interval when explicitly configured.
 
+The script retries temporary network/server failures at the poll interval, reporting an outage once and recovery once. If monitoring exits unexpectedly, inspect the error and restart it with the same snapshot when safe; do not treat termination as completion of the workflow. Report authentication or configuration problems for human intervention rather than repeatedly restarting a failing command.
+
 ## Human interaction and decisions
 
 Only the primary agent talks to the human. The human may communicate entirely through GitHub Issues and comments; treat relevant comments on approved issues as input and respond there. Direct terminal conversation is optional. Subagents report questions and findings to the primary agent. Ask for a human decision before changing intended product behavior, materially expanding or removing approved scope, making lasting product or architecture trade-offs, changing public API compatibility or persistent data/migration strategy, deciding authentication/authorization/privacy/security policy, performing destructive or difficult-to-reverse work, or introducing a paid service or material recurring cost.
