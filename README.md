@@ -4,6 +4,8 @@ Zen Handoff lets you develop software through one coding agent. You describe the
 
 > request → issue → implementation → independent review → completion
 
+> **Security warning:** Zen Handoff is not yet ready for use with public issues. Use it only in private repositories where everyone who can post or edit issues and comments is trusted. The workflow does not yet define how agents verify who may approve work or make decisions; untrusted content could be mistaken for instructions or approval.
+
 ## How it works
 
 - **Primary agent:** your point of contact. It scopes tasks, tracks dependencies, and brings important decisions to you.
@@ -49,3 +51,7 @@ Moving an issue from `status:triage` to `status:ready` is the only label change 
 Issues move through `ready → in-progress → review → closed (completed)`. An issue marked `blocked` needs a dependency or decision. Labels describe only open work: on closure, the agent removes `status:*` and `human-needed`. Cancelled or duplicate issues close as **not planned**, with an explanation; this does not mean their work was delivered. Lasting product and architecture decisions are also recorded under `docs/`.
 
 Detailed agent rules live in the installed `AGENTS.md` and `.agents/` files.
+
+## License
+
+[MIT](LICENSE).
